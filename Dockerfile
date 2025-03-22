@@ -45,4 +45,4 @@ RUN chown -R application:application .
 EXPOSE 80
 
 # Set entrypoint
-# ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
