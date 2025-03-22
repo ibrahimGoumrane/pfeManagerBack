@@ -6,28 +6,25 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectorController;
 
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResources([
-        // User Routes
-        'users' => UserController::class,
-        // Tag Routes
-        'tags' => TagController::class,
-        // Report Routes
-        'reports' => ReportController::class,
-        // Sector Routes
-        'sectors' => SectorController::class,
-    ]);
-    // Auth Routes
-    Route::Controller(AuthController::class)->group(function () {
-        Route::post('/logout', 'logout');
-        Route::get('/user', 'user');
-    });
+// Public Auth Routes (No Authentication Required)
+Route::controller(AuthController::class)->group(function () {
+Route::post('/register', 'register'); // User registration
+Route::post('/login', 'login'); // User login
 });
 
+// Protected Routes (Require Authentication)
+Route::middleware('auth:sanctum')->group(function () {
+// API Resource Routes
+Route::apiResources([
+    'users' => UserController::class,
+    'tags' => TagController::class,
+    'reports' => ReportController::class,
+    'sectors' => SectorController::class,
+]);
 
-// Auth Routes
-Route::Controller(AuthController::class)->group(function () {
-    Route::post('/register', 'register');
-    Route::post('/login', 'login');
+// Authenticated User Routes
+Route::controller(AuthController::class)->group(function () {
+Route::post('/logout', 'logout'); // Logout
+Route::get('/user', 'user'); // Get authenticated user details
+});
 });
