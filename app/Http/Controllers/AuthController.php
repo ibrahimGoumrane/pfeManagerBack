@@ -7,8 +7,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\ErrorResponse;
 
 class AuthController extends Controller
 {
@@ -59,7 +57,9 @@ class AuthController extends Controller
         // check if the user exists
         $user = User::where('email', $fields['email'])->first();
         if(!$user || !Hash::check($fields['password'] , $user->password)) {
-            return ErrorResponse('password  not correct', 401);
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
         }
 
         // create a token for the user
