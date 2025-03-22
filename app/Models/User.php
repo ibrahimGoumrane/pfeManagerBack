@@ -17,10 +17,9 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
+    protected  $guarded = [
+        'account_locked',
+        'role'
     ];
 
     /**
@@ -44,5 +43,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+    public function bookmarks()
+    {
+        return $this->belongsToMany(Report::class , 'bookmarks');
+    }
+    public function sector()
+    {
+        return $this->belongsTo(Sector::class);
     }
 }

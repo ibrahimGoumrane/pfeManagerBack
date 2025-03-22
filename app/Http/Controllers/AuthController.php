@@ -14,7 +14,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        // validate the fields 
+        // validate the fields
         $fields = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -27,13 +27,13 @@ class AuthController extends Controller
             'password.required' => 'Password is required',
             'password.confirmed' => 'Password confirmation does not match',
             'password.min' => 'Password must be at least 8 characters long',
-        ])
+        ]);
         // create the user
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
             'password' => Hash::make($fields['password']),
-        ])
+        ]);
         // create a token for the user
         $token  = $user->createToken($user->email)->plainTextToken;
 
@@ -55,7 +55,7 @@ class AuthController extends Controller
             'email.email' => 'Email must be a valid email address',
             'email.exists' => 'Email does not exist',
             'password.required' => 'Password is required',
-        ])
+        ]);
         // check if the user exists
         $user = User::where('email', $fields['email'])->first();
         if(!$user || !Hash::check($fields['password'] , $user->password)) {
