@@ -22,6 +22,11 @@ Route::apiResources([
     'sectors' => SectorController::class,
 ]);
 
+// Add additional routes for specific actions
+// Route for reports search
+Route::get('/reports/search', [ReportController::class, 'search']);
+
+
 // Authenticated User Routes
 Route::controller(AuthController::class)->group(function () {
 Route::post('/logout', 'logout'); // Logout
