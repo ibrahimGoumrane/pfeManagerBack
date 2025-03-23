@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\sector;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class SectorPolicy
 {
@@ -29,6 +30,7 @@ class SectorPolicy
      */
     public function create(User $user): bool
     {
+        // print the user role
         return $user->role === 'admin';
     }
 

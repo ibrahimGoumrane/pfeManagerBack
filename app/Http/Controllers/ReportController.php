@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\Tag;
-use Illuminate\Auth\Access\Gate;
+use Illuminate\Support\Facades\Gate; // Add this at the top
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -38,12 +40,10 @@ class ReportController extends Controller
         ]);
 
         // Store preview image if provided
-        $previewPath = null;
-        if ($request->hasFile('preview')) {
-            $previewPhoto = $request->file('preview');
-            $previewName = time() . '_' . $previewPhoto->getClientOriginalName();
-            $previewPath = $previewPhoto->storeAs('uploads/previews', $previewName, 'public');
-        }
+        $previewPhoto = $request->file('preview');
+        $previewName = time() . '_' . $previewPhoto->getClientOriginalName();
+        $previewPath = $previewPhoto->storeAs('uploads/previews', $previewName, 'public');
+
 
         // Store PDF report file
         $reportFile = $request->file('url');
@@ -51,7 +51,6 @@ class ReportController extends Controller
         $urlPath = $reportFile->storeAs('uploads/reports', $reportName, 'public');
 
         // Loop through tags and create them if they don't exist
-
 
         $tags = [];
         foreach ($validated['tags'] as $tag) {
@@ -68,7 +67,6 @@ class ReportController extends Controller
             'description' => $validated['description'],
             'preview' => $previewPath, // Stores only file path
             'url' => $urlPath, // Stores only file path
-
         ]);
 
         // Attach tags to the report
@@ -93,7 +91,54 @@ class ReportController extends Controller
      */
     public function update(Request $request, Report $report)
     {
-        //
+        Gate::authorize('update', $report);
+        // Validate request data
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string',
+            'description' => 'sometimes|required|string',
+            'preview' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+            'url' => 'nullable|file|mimes:pdf|max:30720', // PDF max 30MB
+            'tags' => 'nullable|array',
+        ]);
+
+        // Handle preview image update
+        if ($request->hasFile('preview')) {
+            // Delete old preview if exists
+            if ($report->preview) {
+                Storage::disk('public')->delete($report->preview);
+            }
+            // Store new preview
+            $previewPhoto = $request->file('preview');
+            $previewName = time() . '_' . $previewPhoto->getClientOriginalName();
+            $validated['preview'] = $previewPhoto->storeAs('uploads/previews', $previewName, 'public');
+        }
+
+        // Handle PDF report file update
+        if ($request->hasFile('url')) {
+            // Delete old PDF file if exists
+            if ($report->url) {
+                Storage::disk('public')->delete($report->url);
+            }
+            // Store new report file
+            $reportFile = $request->file('url');
+            $reportName = time() . '_' . $reportFile->getClientOriginalName();
+            $validated['url'] = $reportFile->storeAs('uploads/reports', $reportName, 'public');
+        }
+
+        // Update report details
+        $report->update($validated);
+
+        // Handle tags update (if provided)
+        if ($request->has('tags')) {
+            $tags = [];
+            foreach ($validated['tags'] as $tag) {
+                $tag = strtolower(trim($tag));
+                $tags[] = Tag::firstOrCreate(['name' => $tag])->id;
+            }
+            $report->tags()->sync($tags);
+        }
+
+        return response()->json($report->load(['tags']));
     }
 
     /**
@@ -102,6 +147,17 @@ class ReportController extends Controller
     public function destroy(Report $report)
     {
         Gate::authorize('delete' , $report);
+
+        // Delete the preview image
+        $preview = $report->preview;
+        if ($preview) {
+            Storage::disk('public')->delete($preview);
+        }
+        // Delete the report file
+        $url = $report->url;
+        if ($url) {
+            Storage::disk('public')->delete($url);
+        }
         $report->delete();
 
         return response()->json([

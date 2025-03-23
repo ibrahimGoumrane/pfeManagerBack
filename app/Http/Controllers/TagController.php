@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
-use Illuminate\Auth\Access\Gate;
+use Illuminate\Support\Facades\Gate; // Add this at the top
+
 use Illuminate\Http\Request;
 
 class TagController extends Controller
@@ -64,7 +65,7 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag)
     {
-        Gate::authorize('delete');
+        Gate::authorize('delete', $tag);
         $tag->delete();
 
         return response()->json([

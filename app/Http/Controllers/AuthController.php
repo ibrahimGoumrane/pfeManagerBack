@@ -16,6 +16,7 @@ class AuthController extends Controller
         $fields = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
+            'role' => 'nullable|string',
             'password' => 'required|string|confirmed|min:8',
         ] , [
             'name.required' => 'Name is required',
@@ -26,10 +27,25 @@ class AuthController extends Controller
             'password.confirmed' => 'Password confirmation does not match',
             'password.min' => 'Password must be at least 8 characters long',
         ]);
+
+        // check if the user role is provided
+        if (isset($fields['role'])) {
+            // check if the role is valid
+            if (!in_array($fields['role'], ['admin', 'user'])) {
+                return response()->json([
+                    'message' => 'Invalid role'
+                ], 400);
+            }
+        } else {
+            // set the default role to user
+            $fields['role'] = 'user';
+        }
+
         // create the user
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
+            'role' => $fields['role'],
             'password' => Hash::make($fields['password']),
         ]);
         // create a token for the user

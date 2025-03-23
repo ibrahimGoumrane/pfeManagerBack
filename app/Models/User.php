@@ -21,7 +21,6 @@ class User extends Authenticatable
      */
     protected  $guarded = [
         'account_locked',
-        'role'
     ];
 
     /**

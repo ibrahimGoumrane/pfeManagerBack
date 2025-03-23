@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sector;
-use Illuminate\Auth\Access\Gate;
+use Illuminate\Support\Facades\Gate; // Add this at the top
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SectorController extends Controller
 {
@@ -21,7 +23,8 @@ class SectorController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('create');
+
+        Gate::authorize('create', Sector::class);
         $validated = $request->validate([
             'name' => 'required|string|unique:sectors',
 
