@@ -47,7 +47,7 @@ class User extends Authenticatable
     }
     public function reports()
     {
-        return $this->hasMany(Report::class);
+        return $this->hasOne(Report::class);
     }
     public function bookmarks()
     {

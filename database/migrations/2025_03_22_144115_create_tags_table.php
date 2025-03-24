@@ -17,6 +17,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
+
+
         Schema::create('report_tags' , function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('report_id');
@@ -25,8 +27,6 @@ return new class extends Migration
 
             $table->foreign('report_id')->references('id')->on('reports')->onDelete('cascade');
             $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
-
-
         });
     }
 

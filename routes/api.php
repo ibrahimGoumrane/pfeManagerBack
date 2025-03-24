@@ -7,13 +7,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectorController;
 
 // Public Auth Routes (No Authentication Required)
-Route::controller(AuthController::class)->group(function () {
+Route::controller(controller: AuthController::class)->group(function () {
 Route::post('/register', 'register'); // User registration
 Route::post('/login', 'login'); // User login
 });
 
 // Protected Routes (Require Authentication)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function (): void {
 // API Resource Routes
 Route::apiResources([
     'users' => UserController::class,
@@ -25,6 +25,17 @@ Route::apiResources([
 // Add additional routes for specific actions
 // Route for reports search
 Route::get('/reports/search', [ReportController::class, 'search']);
+// Route for downloading reports
+Route::get('/reports/{report}/download', [ReportController::class, 'download']);
+// Route for updating the report validation status
+Route::put('/reports/{report}/validate', [ReportController::class, 'validateReport']);
+
+
+
+// Route for updating the user password
+Route::put('/users/{user}/password', [UserController::class, 'updatePassword']);
+
+
 
 
 // Authenticated User Routes

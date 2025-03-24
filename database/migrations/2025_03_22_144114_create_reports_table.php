@@ -17,7 +17,11 @@ return new class extends Migration
             $table->text('description')->nullable()->default(null);
             $table->string('preview')->nullable()->default(null);
             $table->string('url')->nullable()->default(null);
+            $table->boolean('validated')->default(false);
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

@@ -37,12 +37,12 @@ class ReportController extends Controller
         $reports = null; // Initialize the result variable for Reports
         $hasMoreReports = false; // Initialize flag for more Reports
 
-        // If tags are provided, fetch blogs that match the tags and order by likes count
+        // If tags are provided, fetch blogs that match the tags and only the validated ones
         if (!empty($tags)) {
             $reportsQuery = Report::with(relations: ['user', 'categories']) // Add relationships to load including 'categories'
                 ->whereHas('categories', callback: function ($query) use ($tags) {
                     $query->whereIn(column: 'name', values: $tags); // Filter by tags
-                });
+                })->where('validated', value: true); // Filter by validated reports
 
             // Fetch blogs and check if there are more
             $reports = $reportsQuery->take(11)->get(); // Fetch 11 blogs to check for "hasMoreBlogs"
@@ -50,7 +50,7 @@ class ReportController extends Controller
             $reports = $reports->take(10); // Limit the result to 10 blogs
         } else {
             // Get blogs that match the search query
-            $reportsQuery = Report::with(['user', 'categories']) ;// Add relationships to load
+            $reportsQuery = Report::with(['user', 'categories'])->where('validated', value: true); // Add relationships to load
 
             if ($queryString) {
                 $reportsQuery->where('title', 'like', '%' . $queryString . '%');
@@ -73,6 +73,7 @@ class ReportController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('create', arguments: Report::class);
         $validated = $request->validate([
             'title' => 'required|string',
             'description' => 'required|string',
@@ -109,13 +110,14 @@ class ReportController extends Controller
             $tags[] = Tag::firstOrCreate(['name' => $tag])->id;
         }
 
-
         // Save record in the database
         $report = Report::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'preview' => $previewPath, // Stores only file path
             'url' => $urlPath, // Stores only file path
+            'validated' => false,
+            'user_id' => auth()->id(),
         ]);
 
         // Attach tags to the report
@@ -125,6 +127,23 @@ class ReportController extends Controller
             'tags'
         ]), 201);
 
+    }
+
+    /**
+     * Download the specified report file.
+     */
+
+    public function download(Report $report){
+        return Storage::disk('public')->download($report->url);
+    }
+
+    /**
+     * Validate the specified report.
+     */
+    public function validateReport(Report $report){
+        Gate::authorize('validate', $report);
+        $report->update(['validated' => true]);
+        return response()->json($report);
     }
 
     /**

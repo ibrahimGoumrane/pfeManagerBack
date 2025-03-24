@@ -29,7 +29,19 @@ class ReportPolicy
      */
     public function create(User $user): bool
     {
+        // Check if the user has already create a report as a user is allowed to create only one report
+        if($user->reports()->count() > 0){
+            return response()->json([
+                'message' => 'You have already created a report . You are allowed to create only one report'
+            ], 403);
+        }
+        
         return true;
+    }
+
+    public function validate(User $user): bool
+    {
+        return $user->role === 'admin';
     }
 
     /**
