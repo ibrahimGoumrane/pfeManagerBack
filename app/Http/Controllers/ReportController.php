@@ -64,7 +64,7 @@ class ReportController extends Controller
         return response()->json([
             'currentPage' => !empty($tags) ? 1 : $reports->currentPage(), // If tags are provided, currentPage will always be 1
             'hasMoreReports' => $hasMoreReports, // Indicate if there are more blogs
-            'blogs' => !empty($tags) ? $reports->values() : $reports->items(), // Use items() for paginated results, directly return $blogs for collections
+            'reports' => !empty($tags) ? $reports->values() : $reports->items(), // Use items() for paginated results, directly return $blogs for collections
         ]);
     }
 

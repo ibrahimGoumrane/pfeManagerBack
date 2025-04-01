@@ -24,7 +24,7 @@ Route::apiResources([
 
 // Add additional routes for specific actions
 // Route for reports search
-Route::get('/reports/search', [ReportController::class, 'search']);
+Route::get('/search', [ReportController::class, 'search']);
 // Route for downloading reports
 Route::get('/reports/{report}/download', [ReportController::class, 'download']);
 // Route for updating the report validation status
