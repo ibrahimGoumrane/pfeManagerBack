@@ -20,7 +20,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-       env('DEV_MODE') ? env('DEV_MODE_URL') : env('PROD_MODE_URL'),
+        env('APP_ENV') === 'local' ? "http://localhost:3000" : env('PROD_MODE_URL'),
     ],
 
     'allowed_origins_patterns' => [],
@@ -31,6 +31,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

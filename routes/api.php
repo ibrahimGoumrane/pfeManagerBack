@@ -7,7 +7,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectorController;
 
 // Public Auth Routes (No Authentication Required)
-Route::controller(controller: AuthController::class)->group(function () {
+Route::controller( AuthController::class)->group(function () {
 Route::post('/register', 'register'); // User registration
 Route::post('/login', 'login'); // User login
 });
