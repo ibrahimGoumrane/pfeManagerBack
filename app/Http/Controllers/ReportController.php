@@ -39,8 +39,8 @@ class ReportController extends Controller
 
         // If tags are provided, fetch blogs that match the tags and only the validated ones
         if (!empty($tags)) {
-            $reportsQuery = Report::with(relations: ['user', 'categories']) // Add relationships to load including 'categories'
-                ->whereHas('categories', callback: function ($query) use ($tags) {
+            $reportsQuery = Report::with(relations: ['user', 'tags']) // Add relationships to load including 'tags'
+                ->whereHas('tags', callback: function ($query) use ($tags) {
                     $query->whereIn(column: 'name', values: $tags); // Filter by tags
                 })->where('validated', value: true); // Filter by validated reports
 
@@ -50,7 +50,7 @@ class ReportController extends Controller
             $reports = $reports->take(10); // Limit the result to 10 blogs
         } else {
             // Get blogs that match the search query
-            $reportsQuery = Report::with(['user', 'categories'])->where('validated', value: true); // Add relationships to load
+            $reportsQuery = Report::with(['user', 'tags'])->where('validated', value: true); // Add relationships to load
 
             if ($queryString) {
                 $reportsQuery->where('title', 'like', '%' . $queryString . '%');
@@ -124,7 +124,7 @@ class ReportController extends Controller
         $report->tags()->sync($tags);
 
         return response()->json($report->load([
-            'tags'
+            'tags' , 'user'
         ]), 201);
 
     }
@@ -151,7 +151,7 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
-        return $report->load(['tags']);
+        return $report->load(relations: ['tags' , 'user']);
     }
 
     /**
@@ -206,7 +206,7 @@ class ReportController extends Controller
             $report->tags()->sync($tags);
         }
 
-        return response()->json($report->load(['tags']));
+        return response()->json($report->load(['tags' , 'user']));
     }
 
     /**
