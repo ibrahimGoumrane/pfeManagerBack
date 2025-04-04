@@ -22,7 +22,8 @@ class ReportController extends Controller
      * Search for reports by title or description.
      * And u can also search by tags
      */
-    public function search(Request $request){
+    public function search(Request $request)
+    {
         $validated = $request->validate([
             'query' => 'nullable|string',
             'currentPage' => 'nullable|integer|min:1',
@@ -34,37 +35,33 @@ class ReportController extends Controller
         $currentPage = $validated['currentPage'] ?? 1; // Default to page 1 if not provided
         $tags = $validated['tags'] ?? []; // Default to empty array if no tags provided
 
-        $reports = null; // Initialize the result variable for Reports
-        $hasMoreReports = false; // Initialize flag for more Reports
+        $reportsQuery = Report::with(['user', 'tags']); // Add relationships to load
 
-        // If tags are provided, fetch blogs that match the tags and only the validated ones
+        // Filter by tags if provided
         if (!empty($tags)) {
-            $reportsQuery = Report::with(relations: ['user', 'categories']) // Add relationships to load including 'categories'
-                ->whereHas('categories', callback: function ($query) use ($tags) {
-                    $query->whereIn(column: 'name', values: $tags); // Filter by tags
-                })->where('validated', value: true); // Filter by validated reports
-
-            // Fetch blogs and check if there are more
-            $reports = $reportsQuery->take(11)->get(); // Fetch 11 blogs to check for "hasMoreBlogs"
-            $hasMoreReports = $reports->count() > 10; // If more than 10 blogs are fetched, there are more blogs
-            $reports = $reports->take(10); // Limit the result to 10 blogs
-        } else {
-            // Get blogs that match the search query
-            $reportsQuery = Report::with(['user', 'categories'])->where('validated', value: true); // Add relationships to load
-
-            if ($queryString) {
-                $reportsQuery->where('title', 'like', '%' . $queryString . '%');
-            }
-
-            $reports = $reportsQuery->paginate(10, ['*'], 'page', $currentPage); // Paginated query
-            $hasMoreReports = $reports->hasMorePages(); // Check if there are more pages
+            $reportsQuery->whereHas('tags', function ($query) use ($tags) {
+                $query->whereIn('name', $tags); // Filter by tag names
+            });
         }
 
-        // Return the results
+        // Filter by search query if provided
+        if (!empty($queryString)) {
+            $reportsQuery->where(function ($query) use ($queryString) {
+                $query->where('title', 'like', '%' . $queryString . '%')
+                      ->orWhere('description', 'like', '%' . $queryString . '%');
+            });
+        }
+
+        // Filter by validated reports
+        $reportsQuery->where('validated', true);
+
+        // Paginate the results
+        $reports = $reportsQuery->paginate(10, ['*'], 'page', $currentPage);
+
         return response()->json([
-            'currentPage' => !empty($tags) ? 1 : $reports->currentPage(), // If tags are provided, currentPage will always be 1
-            'hasMoreReports' => $hasMoreReports, // Indicate if there are more blogs
-            'blogs' => !empty($tags) ? $reports->values() : $reports->items(), // Use items() for paginated results, directly return $blogs for collections
+            'currentPage' => $reports->currentPage(),
+            'hasMoreReports' => $reports->hasMorePages(),
+            'reports' => $reports->items(),
         ]);
     }
 
