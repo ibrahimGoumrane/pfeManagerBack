@@ -50,16 +50,18 @@ class ReportController extends Controller
             $reports = $reports->take(10); // Limit the result to 10 blogs
         } else {
             // Get blogs that match the search query
-            $reportsQuery = Report::with(['user', 'tags'])->where('validated', value: true); // Add relationships to load
+            $reportsQuery = Report::with(['user', 'tags']); // Add relationships to load
 
             if ($queryString) {
-                $reportsQuery->where('title', 'like', '%' . $queryString . '%');
+                $reportsQuery->where(function($query) use ($queryString) {
+                    $query->where('title', 'like', '%' . $queryString . '%')
+                          ->orWhere('description', 'like', '%' . $queryString . '%');
+                })->where('validated', true);            
             }
 
             $reports = $reportsQuery->paginate(10, ['*'], 'page', $currentPage); // Paginated query
             $hasMoreReports = $reports->hasMorePages(); // Check if there are more pages
         }
-
         // Return the results
         return response()->json([
             'currentPage' => !empty($tags) ? 1 : $reports->currentPage(), // If tags are provided, currentPage will always be 1
