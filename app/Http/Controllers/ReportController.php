@@ -16,7 +16,8 @@ class ReportController extends Controller
      */
     public function index()
     {
-        return Report::all();
+        $reports = Report::with(['tags', 'user.sector'])->get();
+        return response()->json($reports);
     }
     /**
      * Search for reports by title or description.
@@ -121,7 +122,7 @@ class ReportController extends Controller
         $report->tags()->sync($tags);
 
         return response()->json($report->load([
-            'tags' , 'user'
+            'tags'
         ]), 201);
 
     }
@@ -138,8 +139,14 @@ class ReportController extends Controller
      * Validate the specified report.
      */
     public function validateReport(Report $report){
+        $validated = request()->validate([
+            'validated' => 'required|boolean',
+        ],[
+            'validated.required' => 'The validated field is required.',
+            'validated.boolean' => 'The validated field must be true or false.',
+        ]);
         Gate::authorize('validate', $report);
-        $report->update(['validated' => true]);
+        $report->update(['validated' => $validated['validated']]);
         return response()->json($report);
     }
 
@@ -148,7 +155,7 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
-        return $report->load(relations: ['tags' , 'user']);
+        return $report->load(['tags']);
     }
 
     /**
@@ -203,7 +210,7 @@ class ReportController extends Controller
             $report->tags()->sync($tags);
         }
 
-        return response()->json($report->load(['tags' , 'user']));
+        return response()->json($report->load(['tags']));
     }
 
     /**
