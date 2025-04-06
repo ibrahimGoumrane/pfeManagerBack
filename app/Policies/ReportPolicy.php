@@ -4,10 +4,12 @@ namespace App\Policies;
 
 use App\Models\Report;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ReportPolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
@@ -31,33 +33,49 @@ class ReportPolicy
     {
         // Check if the user has already create a report as a user is allowed to create only one report
         if($user->reports()->count() > 0){
-            return response()->json([
-                'message' => 'You have already created a report . You are allowed to create only one report'
-            ], 403);
+            return false;
         }
         
         return true;
     }
 
-    public function validate(User $user): bool
+    /**
+     * Determine whether the user can validate reports.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Report  $report
+     * @return bool
+     */
+    public function validate(User $user, Report $report)
     {
+        // Only admins can validate reports
         return $user->role === 'admin';
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determine whether the user can update the report.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Report  $report
+     * @return bool
      */
-    public function update(User $user, Report $report): bool
+    public function update(User $user, Report $report)
     {
-        return true;
+        // Users can update their own reports, admins can update any report
+        return $user->id === $report->user_id || $user->role === 'admin';
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the user can delete the report.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Report  $report
+     * @return bool
      */
-    public function delete(User $user, Report $report): bool
+    public function delete(User $user, Report $report)
     {
-        return  $user->role === 'admin' || $user->id === $report->user_id;
+        // Users can delete their own reports, admins can delete any report
+        return $user->id === $report->user_id || $user->role === 'admin';
     }
 
     /**
