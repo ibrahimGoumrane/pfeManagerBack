@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all()->load(['sector']);
+        return User::all()->load(['sector' , 'reports']);
     }
 
     /**
@@ -31,7 +31,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return $user->load(['sector']);
+        return $user->load(['sector' , 'reports']);
     }
 
     /**
@@ -51,7 +51,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return response()->json($user->load(['sector']));
+        return response()->json($user->load(['sector' , 'reports']), 200);
     }
 
     /**
@@ -81,7 +81,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['new_password']),
         ]);
 
-        return response()->json( $user->load(['sector']) , 200);
+        return response()->json( $user->load(['sector','reports']) , 200);
     }
     public function destroy(User $user)
     {
