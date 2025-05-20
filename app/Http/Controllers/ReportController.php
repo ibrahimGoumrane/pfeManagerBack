@@ -90,13 +90,13 @@ class ReportController extends Controller
         // Store preview image if provided
         $previewPhoto = $request->file('preview');
         $previewName = time() . '_' . $previewPhoto->getClientOriginalName();
-        $previewPath = $previewPhoto->storeAs('uploads/previews', $previewName, 'public');
+        $previewPath = $previewPhoto->storeAs('uploads/previews', $previewName, 'digitalocean');
 
 
         // Store PDF report file
         $reportFile = $request->file('url');
         $reportName = time() . '_' . $reportFile->getClientOriginalName();
-        $urlPath = $reportFile->storeAs('uploads/reports', $reportName, 'public');
+        $urlPath = $reportFile->storeAs('uploads/reports', $reportName, 'digitalocean');
 
         // Loop through tags and create them if they don't exist
 
@@ -132,7 +132,7 @@ class ReportController extends Controller
      */
 
     public function download(Report $report){
-        return Storage::disk('public')->download($report->url);
+        return Storage::disk('digitalocean')->download($report->url);
     }
 
     /**
@@ -177,24 +177,24 @@ class ReportController extends Controller
         if ($request->hasFile('preview')) {
             // Delete old preview if exists
             if ($report->preview) {
-                Storage::disk('public')->delete($report->preview);
+                Storage::disk('digitalocean')->delete($report->preview);
             }
             // Store new preview
             $previewPhoto = $request->file('preview');
             $previewName = time() . '_' . $previewPhoto->getClientOriginalName();
-            $validated['preview'] = $previewPhoto->storeAs('uploads/previews', $previewName, 'public');
+            $validated['preview'] = $previewPhoto->storeAs('uploads/previews', $previewName, 'digitalocean');
         }
 
         // Handle PDF report file update
         if ($request->hasFile('url')) {
             // Delete old PDF file if exists
             if ($report->url) {
-                Storage::disk('public')->delete($report->url);
+                Storage::disk('digitalocean')->delete($report->url);
             }
             // Store new report file
             $reportFile = $request->file('url');
             $reportName = time() . '_' . $reportFile->getClientOriginalName();
-            $validated['url'] = $reportFile->storeAs('uploads/reports', $reportName, 'public');
+            $validated['url'] = $reportFile->storeAs('uploads/reports', $reportName, 'digitalocean');
         }
 
         // Update report details
@@ -223,12 +223,12 @@ class ReportController extends Controller
         // Delete the preview image
         $preview = $report->preview;
         if ($preview) {
-            Storage::disk('public')->delete($preview);
+            Storage::disk('digitalocean')->delete($preview);
         }
         // Delete the report file
         $url = $report->url;
         if ($url) {
-            Storage::disk('public')->delete($url);
+            Storage::disk('digitalocean')->delete($url);
         }
         $report->delete();
 
