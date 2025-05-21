@@ -20,8 +20,8 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        // env('APP_ENV') === 'local' ? "http://localhost:3000" : env('PROD_MODE_URL'),
-        'https://pfe-manager-front-lwxz.vercel.app',
+        env('PROD_MODE_URL'),
+        env('DEV_MODE_URL'),
     ],
 
     'allowed_origins_patterns' => [],
