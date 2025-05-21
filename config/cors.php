@@ -20,8 +20,9 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('PROD_MODE_URL'),
-        env('DEV_MODE_URL'),
+        // env('PROD_MODE_URL'),
+        // env('DEV_MODE_URL')
+        '*',
     ],
 
     'allowed_origins_patterns' => [],
