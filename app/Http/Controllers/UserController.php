@@ -55,6 +55,14 @@ class UserController extends Controller
     }
 
     /**
+     * Get reports by user
+     */
+    public function userReports(User $user)
+    {
+        return response()->json($user->reports);
+    }
+
+    /**
      * Update the user password
      *
      */

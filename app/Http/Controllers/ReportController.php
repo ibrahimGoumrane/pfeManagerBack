@@ -155,7 +155,7 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
-        return $report->load(['tags']);
+        return $report->load(['tags' , 'user']);
     }
 
     /**
